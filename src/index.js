@@ -133,9 +133,67 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
     } = resolvedState
 
     // Pagination
+        var atributeChecking = (sortedData) => {
+            var lastPivotVal = pivotBy[pivotBy.length - 1];
+            var result = [];
+            var rowCount = 0;
+           
+            for (var i = 0; i < sortedData.length; i++) {            
+                if (rowCount != pageSize) {
+                    var sortedDataItemRows = [];
+                    var sortedDataItem = sortedData[i];
+
+                    if (sortedDataItem['_subRows'] != undefined) {
+                        sortedDataItem['_subRows'].map((sortedDataSubItem) => {
+                            var sortedDataSubItemRows = [];
+                            var start = pageSize * page;
+                            var end = startRow + pageSize;
+
+                            if (sortedDataSubItem['_pivotID'] == lastPivotVal) {
+                                sortedDataSubItem['_subRows'].map((item) => {
+                                    if (item['_index'] >= start && item['_index'] < end) {
+                                        sortedDataSubItemRows.push(item);
+                                        rowCount = rowCount + sortedDataSubItemRows.length;
+                                    }
+                                })
+                            } 
+
+                            if (sortedDataSubItemRows.length > 0) {
+                                sortedDataItemRows.push({
+                                    _aggregated: sortedDataSubItem['_aggregated'],
+                                    _groupedByPivot: sortedDataSubItem['_groupedByPivot'],
+                                    _nestingLevel: sortedDataSubItem['_nestingLevel'],
+                                    _pivotID: sortedDataSubItem['_pivotID'],
+                                    _pivotVal: sortedDataSubItem['_pivotVal'],
+                                    _subRows: sortedDataSubItemRows
+                                })
+                            }
+                        })
+                    }
+
+                    if (sortedDataItemRows.length > 0) {
+                        result.push({
+                            _aggregated: sortedDataItem['_aggregated'],
+                            _groupedByPivot: sortedDataItem['_groupedByPivot'],
+                            _nestingLevel: sortedDataItem['_nestingLevel'],
+                            _pivotID: sortedDataItem['_pivotID'],
+                            _pivotVal: sortedDataItem['_pivotVal'],
+                            _subRows: sortedDataItemRows
+                        })
+                    }
+                }
+            }
+            return result
+        }
+
+        var sortDataRows = (sortedData) => {
+            var result = atributeChecking(sortedData)
+            return result;
+        }
+
     const startRow = pageSize * page
     const endRow = startRow + pageSize
-    let pageRows = manual ? resolvedData : sortedData.slice(startRow, endRow)
+    let pageRows = manual ? resolvedData : pivotBy ? sortDataRows(sortedData) : sortedData.slice(startRow, endRow);
     const minRows = this.getMinRows()
     const padRows = _.range(Math.max(minRows - pageRows.length, 0))
 
