@@ -47,6 +47,28 @@ export default Base =>
         this.setStateWithData(this.getDataModel(newState, oldState.data !== newState.data))
       }
     }
+    
+    getTotalPages(sortedData, pivotBy, pageSize) {
+      var totalRows = 0, lastPivotVal = pivotBy[pivotBy.length - 1], average = 0, totalPages = 0;
+      
+      sortedData.map((sortedDataItem) => {
+        sortedDataItem['_subRows'].map((sortedDataSubItem) => {
+            if (sortedDataSubItem['_pivotID'] == lastPivotVal) {
+                totalRows = totalRows + sortedDataSubItem['_subRows'].length;
+            }
+        })
+      })
+      
+      totalPages = totalRows / pageSize;
+      
+      if (Number.isInteger(totalPages)) {
+        totalPages = totalPages;
+      } else {
+        totalPages = parseInt(totalPages, 10) + 1
+      }
+
+      return isNaN(totalPages) ? "" : totalPages;
+    }
 
     setStateWithData (newState, cb) {
       const oldState = this.getResolvedState()
@@ -102,6 +124,8 @@ export default Base =>
       if (newResolvedState.sortedData) {
         newResolvedState.pages = newResolvedState.manual
           ? newResolvedState.pages
+          : newResolvedState.pivotBy 
+          ? this.getTotalPages(newResolvedState.sortedData, newResolvedState.pivotBy, newResolvedState.pageSize)
           : Math.ceil(newResolvedState.sortedData.length / newResolvedState.pageSize)
         newResolvedState.page = newResolvedState.manual ? newResolvedState.page : Math.max(
           newResolvedState.page >= newResolvedState.pages
