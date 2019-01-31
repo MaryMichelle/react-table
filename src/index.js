@@ -187,7 +187,7 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
 }
 
 var sortDataRows = (sortedData) => {
-  var result = this.atributeChecking(sortedData)
+  var result = atributeChecking(sortedData)
   return result;
 }
 
