@@ -98,7 +98,7 @@ export default Base =>
         newResolvedState.page = 0
       }
       
-      var getTotalPages = (sortedData, pivotBy, pageSize) {
+      var getTotalPages = (sortedData, pivotBy, pageSize) => {
       var totalRows = 0, lastPivotVal = pivotBy[pivotBy.length - 1], average = 0, totalPages = 0;
       
       sortedData.map((sortedDataItem) => {
